@@ -14,7 +14,7 @@ const server = net.createServer((socket) => {
   socket.write("Welcome to the CS453 command server.\n");
   socket.write("Commands: ECHO, UPPER, LOWER, REVERSE, TIME, QUIT\n");
 
- socket.on("data", (data) => {
+  socket.on("data", (data) => {
     // Splits incoming data packet into individual lines safely
     const lines = data.split(/\r?\n/).filter((line) => line.trim().length > 0);
 
