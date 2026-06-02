@@ -11,17 +11,21 @@ export function handleCommand(line) {
     switch (command.toUpperCase()) {
         case "ECHO":
             return argument;
-
+        // TODO: implement UPPER
+        // Example:UPPER tugce -> TUGCE
         case "UPPER":
             return argument.toUpperCase();
-
+        // TODO: implement LOWER
+        // Example:LOWER TUGCE -> tugce
         case "LOWER":
             return argument.toLowerCase();
-
+        // TODO: implement REVERSE
+        // Example:REVERSE TUGCE -> ECGUT
         case "REVERSE":
             // Splits the argument string into characters, reverses them, and joins them back
             return argument.split("").reverse().join("");
-
+        // TODO: implement TIME
+        // Example:TIME -> current server time
         case "TIME":
             // Returns the current server time in ISO format
             return new Date().toISOString();
