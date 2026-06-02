@@ -1,4 +1,5 @@
 # CS 453/553 Labs
+# TUGCE AKTAS KUCUKTAS
 
 This repository contains small examples and lab exercises for CS 453/553 Client-Server Programming.
 
@@ -90,3 +91,29 @@ This removes generated files such as `node_modules/`, coverage output, build out
 Do not commit `node_modules/`.
 
 Do commit `package.json` and `package-lock.json` for examples and labs so that dependencies are reproducible.
+
+# TUGCE AKTAS KUCUKTAS
+# TCP Command Server Protocol Description
+
+# Protocol Semantics & Message Formats
+All messages are transmitted as plain UTF-8 encoded text strings terminated by a newline (`\n` or `\r\n`) character.
+
+# Requests
+The client sends requests using the following structure:
+`<COMMAND> [argument]`
+* **COMMAND**: A case-insensitive token identifying the action.
+* **argument**: Optional string payload payload parsed by the server logic.
+#Responses
+The server processes incoming commands sequentially and issues a single-line string response:
+* **Success**: Returns the computed mutation of the string payload or system state.
+* **Errors**: Prefixed with `ERROR <reason>` (e.g., `ERROR unknown command: INVALID`).
+
+#Supported Commands
+| Command | Argument | Server Response Example | Description |
+| :--- | :--- | :--- | :--- |
+| `ECHO` | `text` | `text` | Returns the input text unchanged. |
+| `UPPER` | `text` | `TEXT` | Converts payload text to uppercase letters. |
+| `LOWER` | `text` | `text` | Converts payload text to lowercase letters. |
+| `REVERSE`| `text` | `txet` | Reverses the string character order. |
+| `TIME` | None | `2026-06-02T21:07:13.802Z` | Returns current server time in ISO 8601 format. |
+| `QUIT` | None | `Goodbye.` | Tears down the TCP connection stream. |
