@@ -16,10 +16,12 @@ const rl = readline.createInterface({
   prompt: "> "
 });
 
+let rlClosed = false;  // track readline state manually
+
 socket.on("data", (data) => {
   process.stdout.write(data);
 
-  if (!socket.destroyed) {
+  if (!socket.destroyed && !rlClosed) {
     rl.prompt();
   }
 });
@@ -38,11 +40,13 @@ rl.on("line", (line) => {
   socket.write(`${line}\n`);
 
   if (line.trim().toUpperCase() === "QUIT") {
+    rlClosed = true;
     rl.close();
   }
 });
 
 rl.on("close", () => {
+  rlClosed = true;
   if (!socket.destroyed) {
     socket.end();
   }
