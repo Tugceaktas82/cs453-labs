@@ -178,10 +178,13 @@ npm run test:watch
 Answer the following questions in your submission:
 
 1. What is the difference between the client and the server?
+Answer1:The server is a program that just sits there running in the background(on port 3000) and waiting for connections.When someone connects,it processes whatever commands they send,and because of how it's built, it can easily handle multiple clients at the same time.On the other hand, the client is just a temporary program the user opens to connect to the server.It takes whatever you type,sends it over,and prints the server's response on the screen.So while the server stays up for everyone,each client is just an individual session that ends whenever the user decides to quit.
 2. Why does the server need to keep running after handling one request?
+Answer2:Because TCP is a persistent, connection-based protocol.Unlike a one shot request model,the server maintains an open connection with the client and handles multiple commands in a single session.It must keep running to serve future clients as well.
 3. What happens if two clients connect at the same time?
+Answer3:Node.js takes care of this through its event loop. Every client gets their own socket and their own set of event handlers, so each one is dealt with on its own terms.Additionally,no one's waiting on anyone else, and no one's getting in the way.
 4. How is this different from HTTP?
-
+Answer4:Basically,HTTP is stateless and works on a strict request-response basis, meaning every single request is completely independent. Our TCP setup, on the other hand, is stateful and persistent, so the connection just stays open for as long as you want to send commands.Plus, HTTP comes with a lot of extra baggage like headers, status codes, and methods like GET or POST, whereas our TCP protocol is just a super simple, custom text-based system.We can type ten different commands back-to-back, and the server keeps talking to us on that exact same open pipeline until we finally type 'QUIT'.
 ## Submission
 
 Submit your completed lab according to the course submission instructions.
