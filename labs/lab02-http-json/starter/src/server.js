@@ -46,6 +46,10 @@ const server = http.createServer(async (req, res) => {
       } else return send(res, 400, { error: "Unsupported operation" });
       return send(res, 200, { result });
     }
+
+    if (["/health", "/echo", "/calculate", "/requests"].includes(url))
+      return send(res, 405, { error: "Method not allowed" });
+
     return send(res, 404, { error: "Not found" });
   } catch (err) {
     if (err.message === "Invalid JSON")

@@ -75,6 +75,24 @@ Commands are case-insensitive, but the command arguments should be handled as no
 | `QUIT`          | closes connection   |
 | unknown command | error message       |
 
+##
+## Updated Command Protocol & Specification
+### Framing and Connection Rules
+* **Delimitation:** Every distinct command message transmitted over the socket stream must be framed and terminated using a newline character (`\n` or `\r\n`).
+* **Case Insensitivity:** Command keywords are fully case-insensitive (e.g., `echo`, `Echo`, and `ECHO` resolve to the same task). Arguments attached to commands preserve their original character casing.
+* **Session Persistence:** The connection remains persistently open across multiple independent client commands. Sockets are only torn down when a client sends a valid `QUIT` command or encounters an abrupt hardware disconnection.
+
+### Complete Protocol Command Matrix
+
+| Client Command Word | Expected Arguments | Server Response Payload | Core Behavior & Description |
+| **`ECHO`** | `<text>` | Returns the exact `<text>` string | Validates connection echoes |
+| **`UPPER`** | `<text>` | Returns `<text>` transformed to uppercase | Performs string case modification |
+| **`LOWER`** | `<text>` | Returns `<text>` transformed to lowercase | Performs string case modification |
+| **`REVERSE`** | `<text>` | Returns the characters of `<text>` reversed | *Graduate Extension Work* |
+| **`TIME`** | None | Returns the current server time in ISO format | *Graduate Extension Work* |
+| **`QUIT`** | None | Returns `Goodbye.` and drops connection | Initiates active socket termination |
+| *Empty String* | None | Returns `ERROR empty command` | Prevents loop crashes on raw newlines |
+| *Unknown Word* | Any | Returns `ERROR unknown command: <keyword>` | Validates syntax and catches anomalies |
 ## Running the Lab
 
 First, move into the starter directory:
