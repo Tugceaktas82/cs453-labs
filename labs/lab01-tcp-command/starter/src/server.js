@@ -13,13 +13,8 @@ const server = net.createServer((socket) => {
   socket.write("Welcome to the CS453 command server.\n");
   socket.write("Commands: ECHO, UPPER, LOWER, REVERSE, TIME, QUIT\n");
  
-  /**
-     * Added `.trim()` inside the filter condition: `.filter((line) => line.trim().length > 0)`.
-     * * The professor's starter code evaluates raw string length, which passes lines consisting 
-     * solely of spaces (e.g., "   ") into the command system. My implementation sanitizes 
-     * the line at the TCP network layer first, completely filtering out empty whitespace-only 
-     * inputs before they hit the processing loop.
-     */
+  //Added `.trim()` inside the filter condition: `.filter((line) => line.trim().length > 0)`.
+  
   socket.on("data", (data) => {
     // Splits incoming data packet into individual lines safely
     const lines = data.split(/\r?\n/).filter((line) => line.trim().length > 0);
