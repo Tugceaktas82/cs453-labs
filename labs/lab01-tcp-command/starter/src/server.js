@@ -6,14 +6,13 @@ const PORT = Number(process.env.PORT ?? 3000);
 
 const server = net.createServer((socket) => {
   const clientAddress = `${socket.remoteAddress}:${socket.remotePort}`;
-
   console.log(`Client connected: ${clientAddress}`);
 
   socket.setEncoding("utf8");
 
   socket.write("Welcome to the CS453 command server.\n");
   socket.write("Commands: ECHO, UPPER, LOWER, REVERSE, TIME, QUIT\n");
-
+ 
   socket.on("data", (data) => {
     // Splits incoming data packet into individual lines safely
     const lines = data.split(/\r?\n/).filter((line) => line.trim().length > 0);
@@ -25,7 +24,7 @@ const server = net.createServer((socket) => {
       const response = handleCommand(line);
       socket.write(`${response}\n`);
 
-      // Safely sever the socket line if QUIT was triggered
+      // Safely close the socket connection if the QUIT command was triggered
       if (shouldCloseConnection(line)) {
         socket.end();
         return;
