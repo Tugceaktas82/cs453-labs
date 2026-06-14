@@ -16,10 +16,22 @@ const rl = readline.createInterface({
   prompt: "> "
 });
 
+/**
+ * Added an 'rlClosed' boolean flag to explicitly track the lifecycle of the readline interface.
+ * This prevents asynchronous network callbacks from interacting with a closed input stream.
+ */
 let rlClosed = false;  // track readline state manually
 
+// Handle data coming from the server
 socket.on("data", (data) => {
   process.stdout.write(data);
+
+  /**
+   * Added the check `&& !rlClosed` to the conditional statement.
+   * This is a critical safety measure against asynchronous race conditions. If the server sends
+   * data at the exact moment the client is shutting down, it prevents calling `rl.prompt()`
+   * on a closed interface, avoiding runtime warnings or graphical console glitches.
+   */
 
   if (!socket.destroyed && !rlClosed) {
     rl.prompt();
@@ -40,13 +52,23 @@ rl.on("line", (line) => {
   socket.write(`${line}\n`);
 
   if (line.trim().toUpperCase() === "QUIT") {
-    rlClosed = true;
+    /**
+     * Immediately flip the state flag to true right before triggering `rl.close()`.
+     * This ensures that any pending or simultaneous data packets from the socket stream
+     * will immediately acknowledge that the interface is closed.
+     */
+    rlClosed = true; 
     rl.close();
   }
 });
 
 rl.on("close", () => {
-  rlClosed = true;
+  /**
+   * Enforce deterministic state management by explicitly updating 'rlClosed' to true
+   * as soon as the terminal interface closes (e.g., via QUIT or a CTRL+C interrupt signal),
+   * ensuring all asynchronous operational scopes stay fully synchronized.
+   */
+  rlClosed = true; 
   if (!socket.destroyed) {
     socket.end();
   }
