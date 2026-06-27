@@ -23,7 +23,15 @@ describe('API Automated Laboratory Tests', () => {
     expect(res.body).toHaveProperty('id');
     expect(res.body.name).toBe('monitor');
   });
-
+ 
+  test('POST /items with missing fields returns 400', async () => {
+    const res = await request(app)
+      .post('/items')
+      .send({ name: 'incomplete item' }); // quantity missing
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toHaveProperty('error');
+  });
+ 
   test('GET /items/:id can retrieve an item', async () => {
     const res = await request(app).get('/items/1');
     expect(res.statusCode).toBe(200);
