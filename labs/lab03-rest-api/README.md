@@ -3,7 +3,6 @@
 A lightweight, REST-style API built with Node.js and Express to manage an in-memory collection of inventory items. This project demonstrates basic CRUD operations, automated route testing, and complete API specification using OpenAPI 3.0.
 
 ## Features
-
 - **Express Framework:** Utilizes Express for modern, structured routing and request handling.
 - **REST Semantics:** Maps standard HTTP methods (`GET`, `POST`, `PUT`, `DELETE`) directly to CRUD capabilities.
 - **In-Memory Data Store:** Operates on an ephemeral data collection that automatically resets upon server restart.
@@ -11,7 +10,6 @@ A lightweight, REST-style API built with Node.js and Express to manage an in-mem
 - **OpenAPI Documentation:** Comes with an exact schema definition file (`openapi.yaml`).
 
 ## Project Structure
-
 ```text
 ├── node_modules/         # Installed project dependencies
 ├── openapi.yaml          # OpenAPI 3.0 API documentation contract
@@ -20,7 +18,69 @@ A lightweight, REST-style API built with Node.js and Express to manage an in-mem
 ├── server.js             # Core Express server implementation and routing logic
 └── server.test.js        # Automated test suites for all route conditions
 
-***Reflection Questions
+//
+**Getting Started**
+
+*Prerequisites
+
+Node.js (v18 or higher recommended)
+npm (comes bundled with Node.js)
+
+
+*Installation
+-Clone the repository and install the dependencies:
+
+bash
+npm install
+-Running the Server
+
+bash
+npm start
+-The server will start on http://localhost:3000 by default.
+
+-Running Tests
+This project uses Jest and Supertest for automated testing of all routes.
+
+bash
+npm test
+
+All 7 tests should pass, covering health checks, item retrieval, creation, updates, deletion, and 404 handling.
+
+*Example Requests*
+
+////bash
+# Health check
+curl http://localhost:3000/health
+
+# Get all items
+curl http://localhost:3000/items
+
+# Get a single item by ID
+curl http://localhost:3000/items/1
+
+# Create a new item
+curl -X POST http://localhost:3000/items \
+  -H "Content-Type: application/json" \
+  -d '{"name":"mouse","quantity":5}'
+
+# Update an existing item
+curl -X PUT http://localhost:3000/items/1 \
+  -H "Content-Type: application/json" \
+  -d '{"name":"keyboard","quantity":20}'
+
+# Delete an item
+curl -X DELETE http://localhost:3000/items/1
+
+**API Documentation**
+
+The full API contract is defined in openapi.yaml. You can view it interactively by pasting its contents into editor.swagger.io.
+
+*API Endpoints
+
+MethodRouteDescriptionGET/healthHealth check responseGET/itemsReturn all itemsGET/items/:idReturn one item by IDPOST/itemsCreate a new itemPUT/items/:idUpdate an existing itemDELETE/items/:idDelete an existing item
+
+//
+**Reflection Questions
 1. What makes this API more “REST-like” than the previous HTTP/JSON lab?
 Answer 1: In the previous lab, we handled everything using generic request handlers with basic if/else logic based purely on raw URLs, which often feels messy. This lab is significantly more "REST-like" because we explicitly use appropriate HTTP methods (GET, POST, PUT, DELETE) to match specific semantic operations (CRUD) on a clearly defined resource collection (/items). Additionally, using Express routers allowed us to isolate and structure paths natively, while relying on explicit HTTP status codes (like 201 Created or 404 Not Found) instead of generic 200 responses for everything.
 
@@ -29,11 +89,8 @@ Answer 2: A route parameter acts as a dynamic placeholder in the URL path. Inste
 
 3. Why should POST, PUT, and DELETE use different HTTP methods?
 Answer 3: Using different HTTP methods provides semantic clarity and safety. Each method communicates the developer's exact intent to both the server and the client:
-
 -POST is used to create a new resource, and it is non-idempotent (sending it twice creates two separate items).
-
 -PUT is used to completely update or replace a specific existing resource, and it is idempotent (updating the same resource with the same data multiple times leaves it in the exact same state).
-
 -DELETE is explicitly reserved for removing a resource.
 Separating these operations prevents accidental destructive actions and aligns with standard web architecture.
 
