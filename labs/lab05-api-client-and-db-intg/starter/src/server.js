@@ -293,7 +293,10 @@ export async function initializeDatabase() {
       quantity INTEGER NOT NULL CHECK (quantity >= 0)
     )
   `);
-
+  } 
+export async function closePool() {
+  await pool.end();
+}
   const { rows } = await pool.query("SELECT COUNT(*)::int AS count FROM items");
 
   if (rows[0].count === 0) {
@@ -305,7 +308,7 @@ export async function initializeDatabase() {
       ["Keyboard", 10, "Mouse", 5, "Monitor", 3]
     );
   }
-}
+
 
 const isMainModule = process.argv[1] === new URL(import.meta.url).pathname;
 
