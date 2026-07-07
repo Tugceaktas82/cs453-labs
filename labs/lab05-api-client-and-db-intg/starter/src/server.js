@@ -19,12 +19,13 @@ export function createApp() {
 
   app.use(express.json());
 
-  app.use(cors({
-    origin: [
-      "http://localhost:5173",
-      "http://127.0.0.1:5173"
-    ]
-  }));
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    /\.app\.github\.dev$/
+  ]
+}));
 
   app.get("/health", async (req, res) => {
     try {
@@ -90,24 +91,191 @@ export function createApp() {
     }
   });
 
-  // TODO: Return one item by ID.
-  app.get("/api/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+  // Return one item by ID.
+  app.get("/api/items/:id", async (req, res) => {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "id must be a positive integer."
+      });
+    }
+
+    try {
+      const result = await pool.query(
+        `SELECT id, name, quantity FROM items WHERE id = $1`,
+        [id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: "Not Found",
+          message: `No item with id ${id}.`
+        });
+      }
+
+      res.json({ item: result.rows[0] });
+    } catch (error) {
+      console.error("Failed to load item:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Failed to load item."
+      });
+    }
   });
 
-  // TODO: Replace one item by ID.
-  app.put("/api/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+  // Replace one item by ID.
+  app.put("/api/items/:id", async (req, res) => {
+    const id = Number(req.params.id);
+    const name = req.body?.name?.trim();
+    const quantity = Number(req.body?.quantity);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "id must be a positive integer."
+      });
+    }
+
+    if (!name || !Number.isInteger(quantity) || quantity < 0) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "A name and non-negative integer quantity are required."
+      });
+    }
+
+    try {
+      const result = await pool.query(
+        `
+          UPDATE items
+          SET name = $1, quantity = $2
+          WHERE id = $3
+          RETURNING id, name, quantity
+        `,
+        [name, quantity, id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: "Not Found",
+          message: `No item with id ${id}.`
+        });
+      }
+
+      res.json({ item: result.rows[0] });
+    } catch (error) {
+      console.error("Failed to replace item:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Failed to replace item."
+      });
+    }
   });
 
-  // TODO: Partially update one item by ID.
-  app.patch("/api/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+  // Partially update one item by ID.
+  app.patch("/api/items/:id", async (req, res) => {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "id must be a positive integer."
+      });
+    }
+
+    const fields = [];
+    const values = [];
+    let i = 1;
+
+    if (req.body?.name !== undefined) {
+      const name = req.body.name.trim();
+      if (!name) {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "name cannot be empty."
+        });
+      }
+      fields.push(`name = $${i++}`);
+      values.push(name);
+    }
+
+    if (req.body?.quantity !== undefined) {
+      const quantity = Number(req.body.quantity);
+      if (!Number.isInteger(quantity) || quantity < 0) {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "quantity must be a non-negative integer."
+        });
+      }
+      fields.push(`quantity = $${i++}`);
+      values.push(quantity);
+    }
+
+    if (fields.length === 0) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "Provide at least one field to update."
+      });
+    }
+
+    values.push(id);
+
+    try {
+      const result = await pool.query(
+        `UPDATE items SET ${fields.join(", ")} WHERE id = $${i} RETURNING id, name, quantity`,
+        values
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: "Not Found",
+          message: `No item with id ${id}.`
+        });
+      }
+
+      res.json({ item: result.rows[0] });
+    } catch (error) {
+      console.error("Failed to update item:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Failed to update item."
+      });
+    }
   });
 
-  // TODO: Delete one item by ID.
-  app.delete("/api/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+  // Delete one item by ID.
+  app.delete("/api/items/:id", async (req, res) => {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "id must be a positive integer."
+      });
+    }
+
+    try {
+      const result = await pool.query(
+        `DELETE FROM items WHERE id = $1 RETURNING id`,
+        [id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: "Not Found",
+          message: `No item with id ${id}.`
+        });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Failed to delete item."
+      });
+    }
   });
 
   app.use((req, res) => {

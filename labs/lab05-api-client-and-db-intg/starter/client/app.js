@@ -1,4 +1,6 @@
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = window.location.hostname.includes("app.github.dev")
+  ? window.location.origin.replace("-5173", "-3000")
+  : "http://localhost:3000";
 
 const loadButton = document.querySelector("#load-items");
 const itemList = document.querySelector("#items");
@@ -16,7 +18,23 @@ function renderItems(items) {
 
   for (const item of items) {
     const li = document.createElement("li");
-    li.textContent = `${item.id}: ${item.name} (${item.quantity})`;
+
+    const label = document.createElement("span");
+    label.textContent = `${item.id}: ${item.name} (${item.quantity}) `;
+    li.appendChild(label);
+
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.textContent = "Edit";
+    editBtn.addEventListener("click", () => startEdit(item));
+    li.appendChild(editBtn);
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.textContent = "Delete";
+    deleteBtn.addEventListener("click", () => deleteItem(item.id));
+    li.appendChild(deleteBtn);
+
     itemList.appendChild(li);
   }
 }
@@ -64,6 +82,58 @@ async function addItem(name, quantity) {
   }
 }
 
+async function updateItem(id, name, quantity) {
+  setStatus("Updating item...");
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/items/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name, quantity })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message ?? `PUT /api/items/${id} failed with status ${response.status}`);
+    }
+
+    setStatus(`Updated item: ${data.item.name}`);
+    await loadItems();
+  } catch (error) {
+    setStatus(error.message);
+  }
+}
+
+async function deleteItem(id) {
+  setStatus("Deleting item...");
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/items/${id}`, {
+      method: "DELETE"
+    });
+
+    if (!response.ok && response.status !== 204) {
+      const data = await response.json();
+      throw new Error(data.message ?? `DELETE /api/items/${id} failed with status ${response.status}`);
+    }
+
+    setStatus(`Deleted item ${id}.`);
+    await loadItems();
+  } catch (error) {
+    setStatus(error.message);
+  }
+}
+
+function startEdit(item) {
+  itemNameInput.value = item.name;
+  itemQuantityInput.value = item.quantity;
+  form.dataset.editingId = item.id;
+  setStatus(`Editing item ${item.id}. Submit the form to save changes.`);
+}
+
 loadButton.addEventListener("click", loadItems);
 
 form.addEventListener("submit", async (event) => {
@@ -77,7 +147,15 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
+  const editingId = form.dataset.editingId;
+
   itemNameInput.value = "";
   itemQuantityInput.value = "0";
-  await addItem(name, quantity);
+
+  if (editingId) {
+    delete form.dataset.editingId;
+    await updateItem(Number(editingId), name, quantity);
+  } else {
+    await addItem(name, quantity);
+  }
 });
