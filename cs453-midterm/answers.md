@@ -103,3 +103,26 @@ Logging and validation aren't really part of what each route is supposed to do �
 Putting them in middleware means this logic is written once and just runs automatically for every request that needs it. It also keeps the route handlers focused on the actual logic (finding, creating, updating tasks) instead of being cluttered with repeated boilerplate. And if I ever need to change how validation works, or what gets logged, I only have to edit one file instead of going through every single route.
 
 So basically, middleware is the right place for anything that applies to many routes the same way, so it doesn't get duplicated everywhere.
+
+---
+
+# Answers — Part 7: Reflection
+
+## 1. Code vs. Contract
+
+The Express route is the actual code that runs when someone hits an endpoint — it's what really decides what happens: which checks run, what gets saved or looked up, what status code comes back. That's the real behavior of the API.
+
+The OpenAPI file is just a description of what the API is supposed to do. It doesn't run anything on its own, it's basically documentation that lists the routes, what you're supposed to send, and what you'll get back. Nothing stops the two from saying different things unless you go update both every time you change something.
+
+So the route code is what actually happens, and the OpenAPI file is what it says should happen. They're only in sync if someone keeps them that way.
+
+## 2. Drift
+
+Two examples of how they can end up different:
+
+- You add a new field to a task in the code (like `dueDate`) but forget to add it to the Task schema in openapi.yaml. Now the real response has more fields than the spec says.
+- You change a validation rule in validateTask.js, like making `course` optional instead of required, but never go back and update the openapi.yaml file, so it still says `course` is required even though the server doesn't actually require it anymore.
+
+## 3. Client Impact
+
+If the docs don't match the real API, whoever is building a client is basically trusting information that's wrong. They might assume a field will always be there when it's not, or send something the docs say is required when the server doesn't even need it, or not handle a status code because it wasn't mentioned in the docs. Usually they won't notice until their code actually breaks against the real server, and then they have to go dig through the actual server code to figure out what's going on instead of just trusting the documentation, which wastes a lot of time.
