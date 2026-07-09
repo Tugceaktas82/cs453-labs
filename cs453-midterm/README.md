@@ -4,22 +4,26 @@ REST API for tracking course tasks, built with Express. Data is stored in memory
 
 # Project structure
 
-├─ answers.md          # Written answers (Parts 1, 2, 4, 7)
+## Project structure
+
+```
+├─ answers.md           # Written answers (Parts 1, 2, 4, 7)
 ├─ openapi.yaml          # OpenAPI 3.0 spec for the API
-├─ README.md               # This file
+├─ README.md             # This file
 ├─ package.json
 ├─ package-lock.json
 └── src/
-    ├── server.js             # App entry point: /health + /api/tasks
-    ├── client.js              # Basic client that exercises every endpoint
+    ├── server.js               # App entry point: /health + /api/tasks
+    ├── client.js                # Basic client that exercises every endpoint
     ├── data/
-    │   └── tasks.js             # In-memory "database" (plain array)
+    │   └── tasks.js               # In-memory "database" (plain array)
     ├── middleware/
-    │   ├── logger.js             # Logs method,path,status,duration
-    │   ├── validateTask.js        # Validates POST/PUT/PATCH bodies
-    │   └── errorHandler.js        # Centralized 500 error handler
+    │   ├── logger.js               # Logs method, path, status, duration
+    │   ├── validateTask.js         # Validates POST/PUT/PATCH bodies
+    │   └── errorHandler.js         # Centralized 500 error handler
     └── routes/
-        └── tasks.js               # REST routes: GET/POST/PUT/PATCH/DELETE
+        └── tasks.js                # REST routes: GET/POST/PUT/PATCH/DELETE
+```
 
 
 # Requirements
