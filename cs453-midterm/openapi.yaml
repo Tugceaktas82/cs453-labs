@@ -1,0 +1,237 @@
+openapi: 3.0.3
+
+info:
+  title: Course Task Tracker API
+  version: 1.0.0
+  description: >
+    A simple REST API for tracking course tasks. Data is stored in memory
+    (no database), and there is no authentication.
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Server is up and running
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  message:
+                    type: string
+                    example: Course Task Tracker API is running
+
+  /api/tasks:
+    get:
+      summary: List all tasks
+      responses:
+        '200':
+          description: A JSON array of all tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+
+    post:
+      summary: Create a new task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreateInput'
+            example:
+              title: Read syllabus
+              course: CS101
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/tasks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The id of the task
+        schema:
+          type: string
+          example: '1'
+
+    get:
+      summary: Get a single task by id
+      responses:
+        '200':
+          description: The requested task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      summary: Replace an existing task entirely
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskReplaceInput'
+            example:
+              title: Read syllabus carefully
+              course: CS101
+              completed: true
+      responses:
+        '200':
+          description: Task replaced successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      summary: Partially update an existing task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskPatchInput'
+            example:
+              completed: true
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete a task
+      responses:
+        '204':
+          description: Task deleted successfully (no content returned)
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '1'
+        title:
+          type: string
+          example: Watch Week 3 lecture
+        course:
+          type: string
+          example: CS453
+        completed:
+          type: boolean
+          example: false
+      required: [id, title, course, completed]
+
+    TaskCreateInput:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Read syllabus
+        course:
+          type: string
+          example: CS101
+        completed:
+          type: boolean
+          example: false
+      required: [title, course]
+
+    TaskReplaceInput:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Read syllabus carefully
+        course:
+          type: string
+          example: CS101
+        completed:
+          type: boolean
+          example: true
+      required: [title, course, completed]
+
+    TaskPatchInput:
+      type: object
+      description: Any subset of the task's fields. At least one field must be provided.
+      properties:
+        title:
+          type: string
+          example: Read syllabus carefully
+        course:
+          type: string
+          example: CS101
+        completed:
+          type: boolean
+          example: true
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Task with id 999 not found
+
+    ValidationError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Validation failed
+        details:
+          type: array
+          items:
+            type: string
+          example:
+            - 'course is required and must be a non-empty string'
+
+  responses:
+    BadRequest:
+      description: Validation failed (missing or invalid fields)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+
+    NotFound:
+      description: Task not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
