@@ -1,8 +1,4 @@
-/**
- * In-memory "database" for tasks — just a plain array.
- * No real database is used, per the exam's requirements.
- * Data resets whenever the server restarts.
- */
+// plain array as our "database", resets on restart
 let tasks = [
   { id: '1', title: 'Watch Week 3 lecture', course: 'CS453', completed: false },
   { id: '2', title: 'Submit Assignment 2', course: 'CS453', completed: false },

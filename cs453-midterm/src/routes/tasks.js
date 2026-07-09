@@ -3,19 +3,12 @@ const router = express.Router();
 const tasksData = require('../data/tasks');
 const validateTask = require('../middleware/validateTask');
 
-/**
- * GET /api/tasks
- * Returns all tasks.
- * 200 OK with an array of tasks.
- */
+//GET /api/tasks - list everything
 router.get('/', (req, res) => {
   res.status(200).json(tasksData.getAll());
 });
 
-/**
- * GET /api/tasks/:id
- * Returns one task, or 404 if it doesn't exist.
- */
+//GET /api/tasks/:id
 router.get('/:id', (req, res) => {
   const task = tasksData.getById(req.params.id);
 
@@ -26,23 +19,14 @@ router.get('/:id', (req, res) => {
   res.status(200).json(task);
 });
 
-/**
- * POST /api/tasks
- * Creates a new task. The server assigns the id.
- * 201 Created with the new resource, 400 Bad Request if validation fails.
- */
+//POST /api/tasks - server assigns the id
 router.post('/', validateTask('create'), (req, res) => {
   const { title, course, completed } = req.body;
   const newTask = tasksData.create({ title, course, completed });
   res.status(201).json(newTask);
 });
 
-/**
- * PUT /api/tasks/:id
- * Replaces an existing task entirely (all fields required).
- * 200 OK if replaced, 404 Not Found if the task doesn't exist,
- * 400 Bad Request if required fields are missing/invalid.
- */
+//PUT /api/tasks/:id - full replace, all fields required
 router.put('/:id', validateTask('replace'), (req, res) => {
   const { title, course, completed } = req.body;
   const updated = tasksData.replace(req.params.id, { title, course, completed });
@@ -54,12 +38,7 @@ router.put('/:id', validateTask('replace'), (req, res) => {
   res.status(200).json(updated);
 });
 
-/**
- * PATCH /api/tasks/:id
- * Partially updates an existing task (only provided fields change).
- * 200 OK if updated, 404 Not Found if the task doesn't exist,
- * 400 Bad Request if provided fields are invalid or none are provided.
- */
+//PATCH /api/tasks/:id - only updates the fields sent in the body
 router.patch('/:id', validateTask('patch'), (req, res) => {
   const updated = tasksData.patch(req.params.id, req.body);
 
@@ -70,11 +49,7 @@ router.patch('/:id', validateTask('patch'), (req, res) => {
   res.status(200).json(updated);
 });
 
-/**
- * DELETE /api/tasks/:id
- * Deletes a task.
- * 204 No Content if deleted, 404 Not Found if it doesn't exist.
- */
+//DELETE /api/tasks/:id
 router.delete('/:id', (req, res) => {
   const deleted = tasksData.remove(req.params.id);
 

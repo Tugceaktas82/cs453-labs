@@ -3,13 +3,9 @@ openapi: 3.0.3
 info:
   title: Course Task Tracker API
   version: 1.0.0
-  description: >
-    A simple REST API for tracking course tasks. Data is stored in memory
-    (no database), and there is no authentication.
 
 servers:
   - url: http://localhost:3000
-    description: Local development server
 
 paths:
   /health:
@@ -17,7 +13,7 @@ paths:
       summary: Health check
       responses:
         '200':
-          description: Server is up and running
+          description: Server is running
           content:
             application/json:
               schema:
@@ -25,17 +21,15 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: ok
                   message:
                     type: string
-                    example: Course Task Tracker API is running
 
   /api/tasks:
     get:
       summary: List all tasks
       responses:
         '200':
-          description: A JSON array of all tasks
+          description: Array of tasks
           content:
             application/json:
               schema:
@@ -51,94 +45,111 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TaskCreateInput'
-            example:
-              title: Read syllabus
-              course: CS101
       responses:
         '201':
-          description: Task created successfully
+          description: Task created
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /api/tasks/{id}:
     parameters:
       - name: id
         in: path
         required: true
-        description: The id of the task
         schema:
           type: string
-          example: '1'
 
     get:
-      summary: Get a single task by id
+      summary: Get one task by id
       responses:
         '200':
-          description: The requested task
+          description: The task
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
         '404':
-          $ref: '#/components/responses/NotFound'
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
     put:
-      summary: Replace an existing task entirely
+      summary: Replace an existing task
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/TaskReplaceInput'
-            example:
-              title: Read syllabus carefully
-              course: CS101
-              completed: true
       responses:
         '200':
-          description: Task replaced successfully
+          description: Task replaced
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
-          $ref: '#/components/responses/NotFound'
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
     patch:
-      summary: Partially update an existing task
+      summary: Partially update a task
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/TaskPatchInput'
-            example:
-              completed: true
       responses:
         '200':
-          description: Task updated successfully
+          description: Task updated
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
-          $ref: '#/components/responses/NotFound'
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
     delete:
       summary: Delete a task
       responses:
         '204':
-          description: Task deleted successfully (no content returned)
+          description: Task deleted
         '404':
-          $ref: '#/components/responses/NotFound'
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
@@ -147,16 +158,12 @@ components:
       properties:
         id:
           type: string
-          example: '1'
         title:
           type: string
-          example: Watch Week 3 lecture
         course:
           type: string
-          example: CS453
         completed:
           type: boolean
-          example: false
       required: [id, title, course, completed]
 
     TaskCreateInput:
@@ -164,13 +171,10 @@ components:
       properties:
         title:
           type: string
-          example: Read syllabus
         course:
           type: string
-          example: CS101
         completed:
           type: boolean
-          example: false
       required: [title, course]
 
     TaskReplaceInput:
@@ -178,60 +182,28 @@ components:
       properties:
         title:
           type: string
-          example: Read syllabus carefully
         course:
           type: string
-          example: CS101
         completed:
           type: boolean
-          example: true
       required: [title, course, completed]
 
     TaskPatchInput:
       type: object
-      description: Any subset of the task's fields. At least one field must be provided.
       properties:
         title:
           type: string
-          example: Read syllabus carefully
         course:
           type: string
-          example: CS101
         completed:
           type: boolean
-          example: true
 
     Error:
       type: object
       properties:
         error:
           type: string
-          example: Task with id 999 not found
-
-    ValidationError:
-      type: object
-      properties:
-        error:
-          type: string
-          example: Validation failed
         details:
           type: array
           items:
             type: string
-          example:
-            - 'course is required and must be a non-empty string'
-
-  responses:
-    BadRequest:
-      description: Validation failed (missing or invalid fields)
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ValidationError'
-
-    NotFound:
-      description: Task not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'

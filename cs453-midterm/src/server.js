@@ -6,24 +6,21 @@ const tasksRouter = require('./routes/tasks');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- Global middleware (runs on every request, in this order) ---
-app.use(express.json());   // parses JSON bodies into req.body
-app.use(requestLogger);    // logs every incoming request
+app.use(express.json());
+app.use(requestLogger);
 
-// --- Health check ---
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Course Task Tracker API is running' });
 });
 
-// --- Resource routes ---
 app.use('/api/tasks', tasksRouter);
 
-// --- 404 handler for unmatched routes ---
+//no route matched
 app.use((req, res) => {
   res.status(404).json({ error: `Route ${req.method} ${req.originalUrl} not found` });
 });
 
-// --- Centralized error handler (must be last, has 4 args) ---
+//has to stay last, needs 4 args to be picked up as error handler
 app.use(errorHandler);
 
 app.listen(PORT, () => {

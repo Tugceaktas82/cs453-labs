@@ -1,12 +1,8 @@
-/**
- * Validates the request body for creating/replacing/patching a task.
- *
- * mode = 'create'  -> POST:  title, course are required; completed optional (defaults to false)
- * mode = 'replace' -> PUT:   title, course, completed are ALL required (full replacement)
- * mode = 'patch'   -> PATCH: any subset of {title, course, completed} may be present,
- *                             but whatever IS present must have a valid type, and at
- *                             least one field must be provided.
- */
+// checks the body depending on which mode we're in:
+// create (POST)  -> title + course required, completed optional (defaults false)
+// replace (PUT)  -> title, course, completed ALL required
+// patch (PATCH)  -> any subset can be sent, but at least one field is needed
+//                    and whatever is sent has to have the right type
 function validateTask(mode) {
   return (req, res, next) => {
     const body = req.body || {};

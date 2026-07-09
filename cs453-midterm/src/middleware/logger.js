@@ -1,13 +1,6 @@
-/**
- * Request logging middleware.
- * Logs: HTTP method, path, response status code, and time taken (ms).
- *
- * We can't know the final status code or duration until the response
- * has actually finished sending, so we listen for the 'finish' event
- * on `res` (fired after Express sends the response) rather than logging
- * immediately. next() is still called right away so the request isn't
- * blocked waiting for its own response.
- */
+// logs method, path, status code and duration for each request.
+// status code isn't known until the response actually finishes, so we
+// hook into the 'finish' event instead of logging right away
 function requestLogger(req, res, next) {
   const startTime = Date.now();
 
