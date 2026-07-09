@@ -86,3 +86,20 @@ Example 2: The server would respond 201 Created with the full resource, includin
   "course": "CS453",
   "completed": false
    }
+---
+
+# Answers — Part 4: Middleware
+
+## Implemented middleware
+
+1. Request logger (src/middleware/logger.js) — logs the HTTP method, path, status code, and how long the request took. It hooks into the response's "finish" event, since the status code and duration aren't known until Express actually finishes sending the response back.
+
+2. Validation middleware (src/middleware/validateTask.js) — checks the request body for POST, PUT, and PATCH on /api/tasks. If a required field is missing or has the wrong type, it responds with 400 before the request ever reaches the route handler.
+
+## Why these are middleware instead of route logic
+
+Logging and validation aren't really part of what each route is supposed to do — a route like "create a task" should be about creating a task, not about checking timestamps or re-checking the same fields over and over. If I put this code inside every route handler, I'd basically be copying the same few lines into GET, POST, PUT, PATCH and DELETE, which gets messy fast and is easy to mess up (forgetting to log one route, or validating a field slightly differently somewhere else).
+
+Putting them in middleware means this logic is written once and just runs automatically for every request that needs it. It also keeps the route handlers focused on the actual logic (finding, creating, updating tasks) instead of being cluttered with repeated boilerplate. And if I ever need to change how validation works, or what gets logged, I only have to edit one file instead of going through every single route.
+
+So basically, middleware is the right place for anything that applies to many routes the same way, so it doesn't get duplicated everywhere.
