@@ -56,19 +56,19 @@ Situation                                           |     Justification
 1. Resource URIs  &  
 2. Method Semantics 
 
-Operation                |  URI                | Semantic Classification | Explanation
-_____________________________________________________________________________________________________________________
-Get all tasks            |  GET /tasks         | Safe & Idempotent       | Safe because it only retrieves data without changing server state. Idempotent because calling it multiple times always returns the same result (assuming data hasn't changed elsewhere). 
-_____________________________________________________________________________________________________________________
-Get one task by id       |  GET /tasks/{id}    | Safe & Idempotent       | Safe because it is a read-only lookup. Idempotent because repeatedly looking up the same ID yields identical results.
-_____________________________________________________________________________________________________________________
-Create a task            |  POST /tasks        | Neither                 | It changes server state by inserting a new record (not safe). It is not idempotent because repeating the request will create multiple duplicate records. 
-_____________________________________________________________________________________________________________________
-Replace a task           |  PUT /tasks/{id}    | Idempotent & Not Safe   | Not safe because it overwrites an existing resource. It is idempotent because sending the exact same payload to the same URI multiple times results in the same final state. 
-_____________________________________________________________________________________________________________________
-Partially update a task  |  PATCH /tasks/{id}  | Neither                 | It modifies state, so it isn't safe. By HTTP semantics, PATCH is only idempotent if the patch describes an absolute end state (such as "set completed to true"); it becomes non-idempotent if it describes a relative change (such as "toggle completed" or "append to title"), since repeating it would keep changing the resource. Since the exam doesn't restrict the patch format, we treat it conservatively as neither safe nor guaranteed idempotent. 
-_____________________________________________________________________________________________________________________
-Delete a task            |  DELETE /tasks/{id} | Idempotent (Not Safe)   | It changes state (removes a resource), so not safe. It is idempotent because deleting the same id repeatedly leaves the system in the same end state: the task is gone after the first call, and it's still gone after every subsequent call (later calls typically respond 404 instead of 204, but the state doesn't change further).
+|Operation               |URI                  |Semantic Classification  |Explanation   |
+|----------------------- |-------------------- |------------------------ |------------- |  
+|Get all tasks           |GET /tasks           |Safe & Idempotent        |Safe because it only retrieves data without changing server state. Idempotent because calling it multiple times always returns the same result (assuming data hasn't changed elsewhere). |
+|----------------------- |-------------------- |------------------------ |------------- |  
+|Get one task by id      |GET /tasks/{id}      |Safe & Idempotent        |Safe because it is a read-only lookup. Idempotent because repeatedly looking up the same ID yields identical results.|
+|----------------------- |-------------------- |------------------------ |------------- |  
+|Create a task           |POST /tasks          | Neither                   |It changes server state by inserting a new record (not safe). It is not idempotent because repeating the request will create multiple duplicate records. |
+|----------------------- |-------------------- |------------------------ |------------- |  
+|Replace a task           |  PUT /tasks/{id}   |Idempotent & Not Safe   |Not safe because it overwrites an existing resource. It is idempotent because sending the exact same payload to the same URI multiple times results in the same final state. |
+|----------------------- |-------------------- |------------------------ |------------- |  
+|Partially update a task  |  PATCH /tasks/{id} |Neither                 |It modifies state, so it isn't safe. By HTTP semantics, PATCH is only idempotent if the patch describes an absolute end state (such as "set completed to true"); it becomes non-idempotent if it describes a relative change (such as "toggle completed" or "append to title"), since repeating it would keep changing the resource. Since the exam doesn't restrict the patch format, we treat it conservatively as neither safe nor guaranteed idempotent. |
+|----------------------- |-------------------- |------------------------ |------------- |  
+|Delete a task           |DELETE /tasks/{id}   |Idempotent (Not Safe)   |It changes state (removes a resource), so not safe. It is idempotent because deleting the same id repeatedly leaves the system in the same end state: the task is gone after the first call, and it's still gone after every subsequent call (later calls typically respond 404 instead of 204, but the state doesn't change further).|
 _____________________________________________________________________________________________________________________
 *Safe = the method does not modify server state (read only).
 *Idempotent = making the same request multiple times produces the same end state as making it once (the response can be different, e.g. 200 vs 404, but the underlying resource state converges to the same result).
