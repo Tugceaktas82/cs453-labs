@@ -18,17 +18,15 @@ TCP command server You make all the rules from scratch here. The client connects
 
 An HTTP API: It’s simple. The client sends a text block with the requested method, path, and headers (eg. GET /users/123 HTTP/1.1 ) to the server. The server parses that text and returns a valid HTTP response block with a status code ( e.g. HTTP/1.1 200 OK ).
 
-A route handler for Express: All this is wrapped up by Express.js in JavaScript. It takes the raw HTTP request, wraps it in a req (Request) object, and gives you a res (Response) object with some helper utilities. So when you write res.status(200).json( user: ‘Alice’ ), Express takes that JavaScript object, converts it back into a normal HTTP text response, and pushes it down the TCP socket.
+A route handler : All this is wrapped up by Express.js in JavaScript. It takes the raw HTTP request, wraps it in a req (Request) object, and gives you a res (Response) object with some helper utilities. So when you write res.status(200).json( user: ‘Alice’ ), Express takes that JavaScript object, converts it back into a normal HTTP text response, and pushes it down the TCP socket.
 -------------------------------------
 3. Statelessness
 
 For a stateless API, there is no way for the server to store any information, or session data, about the client from one request to the next. A request is sent independent of the next. The client is responsible for sending all required data (like an authentication token, user ID, state flags) in each request.
-
 Advantages (Scalability): Since the server cannot store session information in memory, it is possible to use a load balancer for the application and forward requests to any available server instance.
-
 Disadvantages (Overhead on the Network): As the server has no information about anything, the client has to include bulky authentication tokens (JWTs) and context information in each API call.
--------------------------------------
 
+-------------------------------------
 4)
 
 
@@ -57,17 +55,12 @@ Situation                                           |     Justification
 2. Method Semantics 
 
 |Operation               |URI                  |Semantic Classification  |Explanation   |
-|----------------------- |-------------------- |------------------------ |------------- |  
+|---------               |---                  |-----------------------  |-----------   |  
 |Get all tasks           |GET /tasks           |Safe & Idempotent        |Safe because it only retrieves data without changing server state. Idempotent because calling it multiple times always returns the same result (assuming data hasn't changed elsewhere). |
-|----------------------- |-------------------- |------------------------ |------------- |  
 |Get one task by id      |GET /tasks/{id}      |Safe & Idempotent        |Safe because it is a read-only lookup. Idempotent because repeatedly looking up the same ID yields identical results.|
-|----------------------- |-------------------- |------------------------ |------------- |  
 |Create a task           |POST /tasks          | Neither                   |It changes server state by inserting a new record (not safe). It is not idempotent because repeating the request will create multiple duplicate records. |
-|----------------------- |-------------------- |------------------------ |------------- |  
 |Replace a task           |  PUT /tasks/{id}   |Idempotent & Not Safe   |Not safe because it overwrites an existing resource. It is idempotent because sending the exact same payload to the same URI multiple times results in the same final state. |
-|----------------------- |-------------------- |------------------------ |------------- |  
-|Partially update a task  |  PATCH /tasks/{id} |Neither                 |It modifies state, so it isn't safe. By HTTP semantics, PATCH is only idempotent if the patch describes an absolute end state (such as "set completed to true"); it becomes non-idempotent if it describes a relative change (such as "toggle completed" or "append to title"), since repeating it would keep changing the resource. Since the exam doesn't restrict the patch format, we treat it conservatively as neither safe nor guaranteed idempotent. |
-|----------------------- |-------------------- |------------------------ |------------- |  
+|Partially update a task  |  PATCH /tasks/{id} |Neither                 |It modifies state, so it isn't safe. By HTTP semantics, PATCH is only idempotent if the patch describes an absolute end state (such as "set completed to true"); it becomes non-idempotent if it describes a relative change (such as "toggle completed" or "append to title"), since repeating it would keep changing the resource. Since the exam doesn't restrict the patch format, we treat it conservatively as neither safe nor guaranteed idempotent. | 
 |Delete a task           |DELETE /tasks/{id}   |Idempotent (Not Safe)   |It changes state (removes a resource), so not safe. It is idempotent because deleting the same id repeatedly leaves the system in the same end state: the task is gone after the first call, and it's still gone after every subsequent call (later calls typically respond 404 instead of 204, but the state doesn't change further).|
 _____________________________________________________________________________________________________________________
 *Safe = the method does not modify server state (read only).
