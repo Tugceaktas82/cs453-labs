@@ -30,22 +30,24 @@ Disadvantages (Overhead on the Network): As the server has no information about 
 -------------------------------------
 
 4)
-Situation                                           |     Status Code   
-___________________________________________________________________________________   
-A new resource was successfully created             |     201 Created
-The client requested an item that does not exist    |     404 Not Found
-The client sent JSON missing a required field       |     400 Bad Request
-The server had an unexpected error                  |     500 Internal Server Error
-A successful request returns JSON data              |     200 OK
+
+
+|Situation                                           |Status Code               |  
+|--------------------------------------------------- |------------------------- |  
+|A new resource was successfully created             |201 Created               |
+|The client requested an item that does not exist    |404 Not Found             |
+|The client sent JSON missing a required field       |400 Bad Request           |
+|The server had an unexpected error                  |500 Internal Server Error |
+|A successful request returns JSON data              |200 OK                    |
 
 
 Situation                                           |     Justification
-___________________________________________________________________________________   
--A new resource was successfully created          |Signals that the request succeeded and resulted in a new resource being created (conventionally paired with a Location header pointing to the new resource).
--The client requested an item that does not exist |The default status code where the server is able to connect with the client, but is not able to locate any resource associated with the requested URI.
--The client sent JSON missing a required field    |The actual request made by the client is malformed and invalid; the server can’t understand it in its present form and must be remedied by the client himself.
--The server had an unexpected error               |The generic catch-all code used when the client's request is fine, but the server encounters an unhandled exception or crash internally.
--A successful request returns JSON data           |The standard status code for a successful HTTP request, showing that the operation worked perfectly and the data is present in the response body.
+|-------------------------------------------------- |-------------------------- |  
+|A new resource was successfully created          |Signals that the request succeeded and resulted in a new resource being created (conventionally paired with a Location header pointing to the new resource).|
+|The client requested an item that does not exist |The default status code where the server is able to connect with the client, but is not able to locate any resource associated with the requested URI.|
+|The client sent JSON missing a required field    |The actual request made by the client is malformed and invalid; the server can’t understand it in its present form and must be remedied by the client himself.|
+|The server had an unexpected error               |The generic catch-all code used when the client's request is fine, but the server encounters an unhandled exception or crash internally.|
+|A successful request returns JSON data           |The standard status code for a successful HTTP request, showing that the operation worked perfectly and the data is present in the response body.|
 
 ----------------------------------------------------------------------------------------------------------------------------
 
