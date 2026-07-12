@@ -1,4 +1,3 @@
-//app.js
 const API_BASE_URL = window.location.hostname.includes("app.github.dev")
   ? window.location.origin.replace("-5173", "-3000")
   : "http://localhost:3000";
