@@ -1,4 +1,4 @@
-# Lab 5 Starter
+# Lab 5 - API Routes, Clients, and DB Integration
 
 ## How to Run
 
@@ -7,6 +7,7 @@ npm install
 docker compose up -d
 npm run api
 npm run client
+npm test
 ```
 
 Open:
@@ -21,46 +22,46 @@ Postgres is exposed on:
 postgres://postgres:postgres@localhost:5433/lab05
 ```
 
-## What Already Works
+## What This Project Does
 
-- Postgres runs in Docker.
-- The Express server connects to Postgres.
-- The server creates and seeds an `items` table on startup.
-- `GET /health`, `GET /api/items`, and `POST /api/items` are implemented.
-- The browser client can load items and add a new item.
+Postgres runs in Docker.
 
-## What You Need to Add
+The Express server connects to Postgres and creates/seeds the items table on startup.
 
+Full CRUD is implemented
+- `GET /health`
+- `GET /api/items`
 - `GET /api/items/:id`
+- `POST /api/items`
 - `PUT /api/items/:id`
 - `PATCH /api/items/:id`
 - `DELETE /api/items/:id`
-- Better validation and error handling
-- Client-side UI for at least some of the new routes
 
-## Graduate Extension
+Every route validates its input (integer ids, required fields, non-negative quantities) and returns the right status code (200, 201, 204, 400, 404, 500).
 
-Add one more resource or relationship, such as categories, projects, or tags,
-and connect it to the database.
+SQL queries are parameterized ($1, $2, ...) to avoid SQL injection.
+
+The browser client can load items, add a new item, edit an existing item (pre-fills the form and sends PUT), and delete an item.
+
+All 11 tests in src/server.test.js pass with npm test.
 
 ## Reflection Answers
 
 ### 1. What changed when the API moved from in-memory data to Postgres?
 
-Data now persists across server restarts instead of resetting every time the server process restarted. I had to write actual SQL (SELECT, INSERT,UPDATE, DELETE) instead of manipulating a JavaScript array, and I had to use parameterized queries ($1, $2, ...) to avoid SQL injection. I also had to handle async database errors separately from validation errors.
+The biggest difference is that data actually sticks around now. With the in-memory version, restarting the server wiped everything back to the seed data, but with Postgres the items are still there no matter how many times I restart. I also had to switch from just pushing/splicing a JS array to writing real SQL for every operation (SELECT, INSERT, UPDATE, DELETE), and I made sure to use parameterized queries like $1 and $2 instead of building query strings by hand, so I don't open the door to SQL injection. On top of that, database calls can fail in ways form validation never could, so I had to add separate try/catch blocks for database errors instead of just checking the request body.
 
 ### 2. When should you use `PUT` instead of `PATCH`?
 
-PUT should be used when you want to replace the entire resource with a complete new representation — the client sends every field, and any field left out is expected to be treated as missing or reset. PATCH is better when you only want to change one or two fields without resending the whole object, which is what my client's edit form actually does in practice.
+I'd use `PUT` when the client is sending a full replacement for the resource, and every field gets included, and if something is left out it's basically treated as gone or reset to default. `PATCH` makes more sense when you only want to touch one or two fields and leave the rest alone. That's actually closer to how my edit form behaves in real use, since most of the time a user just wants to bump the quantity up or down without retyping the name.
 
 ### 3. What kinds of validation belong in the API even if the browser client also validates input?
 
-The API must always re-validate, because it can never trust the client.Anyone can call the endpoints directly with curl or another tool, bypassing the browser entirely. So type checks (integer id, non-negative quantity), required-field checks, and existence checks (404 if the row isn't found) all have to live in the API, not just the client-side form.
+Basically all the validation still needs to live on the server, because there's no guarantee a request is even coming from the browser form. Someone could hit the endpoint directly with curl, Postman, or anything else and skip whatever checks the client-side JS does. So things like making sure the id is a real integer, quantity isn't negative, required fields aren't missing, and returning 404 when a row doesn't exist, all of that has to be enforced in the route handlers themselves, not just assumed because the form checked it first.
 
 ### 4. How does the browser client help you test the API differently than `curl` alone?
 
-The browser client lets me see the full user-facing flow: clicking Edit pre-fills a form, submitting it calls PUT, and the list re-renders
-automatically. curl only tests one request/response pair at a time and doesn't show how the UI reacts to success or error states, so the browser client is closer to how a real user would actually interact with the app.
+`curl` is great for hitting one endpoint and seeing exactly what comes back, but it doesn't show you what it actually feels like to use the app. With the browser client I can click Edit and watch the form fill in with the item's current values, submit it and see the PUT request go out, and then watch the list refresh automatically. That's a much closer match to how a real user would interact with this than firing off individual requests from the terminal one at a time.
 
 ### 5. If you added an extension, what did you add and why?
 

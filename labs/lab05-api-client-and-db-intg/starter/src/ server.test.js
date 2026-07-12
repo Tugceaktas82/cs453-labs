@@ -1,3 +1,4 @@
+//server.test.js
 import request from "supertest";
 import { createApp, initializeDatabase, closePool } from "./server.js";
 
